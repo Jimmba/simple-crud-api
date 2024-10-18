@@ -7,3 +7,8 @@ export interface ICreateUser {
   age: number;
   hobbies: string[];
 }
+
+export interface IUpdateUser {
+  userId: string;
+  user: ICreateUser;
+}

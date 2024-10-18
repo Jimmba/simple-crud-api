@@ -4,11 +4,11 @@ import { Router } from "./router";
 import { sendResponse } from "./helpers";
 import { STATUS_CODES } from "./constants";
 import { HttpException } from "./exceptions";
-import { Database } from "./database";
+
 config();
 
-export const serverCallback = async (db: Database) => {
-  const router = new Router(db);
+export const serverCallback = async () => {
+  const router = new Router();
   return async (req: IncomingMessage, res: ServerResponse) => {
     try {
       return await router.handleRequest(req, res);
@@ -27,8 +27,7 @@ export const serverCallback = async (db: Database) => {
 
 async function bootstrap() {
   const port = parseInt(process.env.PORT || "4000", 10);
-  const db = new Database();
-  const app = createServer(await serverCallback(db));
+  const app = createServer(await serverCallback());
 
   await app.listen(port);
   console.log(`Server is started at port ${port}`);

@@ -4,44 +4,43 @@ import { sendResponse, validateCreateUser, validateUuid } from "../helpers";
 import { BadRequestException } from "../exceptions";
 import { ICreateUser } from "../interfaces";
 import { UserService } from "../services";
-import { Database } from "../database";
 
 export class UserController {
   userService: UserService;
 
-  constructor(db: Database) {
-    this.userService = new UserService(db);
+  constructor() {
+    this.userService = new UserService();
   }
 
   async createUser(res: ServerResponse, body: ICreateUser) {
     validateCreateUser(body);
-    const user = this.userService.createUser(body);
+    const user = await this.userService.createUser(body);
     return sendResponse(res, STATUS_CODES.CREATED, user);
   }
 
-  getAllUsers(res: ServerResponse): void {
-    const users = this.userService.getAllUsers();
+  async getAllUsers(res: ServerResponse) {
+    const users = await this.userService.getAllUsers();
     return sendResponse(res, STATUS_CODES.OK, users);
   }
 
-  getUserById(res: ServerResponse, userId: string): void {
+  async getUserById(res: ServerResponse, userId: string) {
     validateUuid(userId);
-    const users = this.userService.getUserById(userId);
+    const users = await this.userService.getUserById(userId);
     return sendResponse(res, STATUS_CODES.OK, users);
   }
 
-  updateUser(res: ServerResponse, body: ICreateUser, userId?: string): void {
+  async updateUser(res: ServerResponse, body: ICreateUser, userId?: string) {
     if (!userId) throw new BadRequestException(`userId is not passed`);
     validateUuid(userId);
     validateCreateUser(body);
-    const user = this.userService.updateUser(userId, body);
+    const user = await this.userService.updateUser(userId, body);
     return sendResponse(res, STATUS_CODES.OK, user);
   }
 
-  removeUser(res: ServerResponse, userId: string | undefined): void {
+  async removeUser(res: ServerResponse, userId: string | undefined) {
     if (!userId) throw new BadRequestException(`userId is not passed`);
     validateUuid(userId);
-    this.userService.removeUser(userId);
+    await this.userService.removeUser(userId);
     return sendResponse(res, STATUS_CODES.NO_CONTENT);
   }
 }

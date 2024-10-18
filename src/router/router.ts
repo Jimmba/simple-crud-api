@@ -4,7 +4,6 @@ import { BadRequestException, NotFoundException } from "../exceptions";
 import { HTTP_METHODS } from "../constants";
 import { getBodyFromRequest } from "../helpers";
 import { ICreateUser } from "../interfaces";
-import { Database } from "../database";
 
 // const routesHandlers = { //! controller handler
 //   users: UserController,
@@ -13,19 +12,14 @@ import { Database } from "../database";
 export class Router {
   userController: UserController;
 
-  constructor(db: Database) {
-    this.userController = new UserController(db);
+  constructor() {
+    this.userController = new UserController();
   }
 
   async handleRequest(req: IncomingMessage, res: ServerResponse) {
     const { method, url } = req;
     if (!url) throw new BadRequestException("path is not passed");
     if (!method) throw new BadRequestException("method is not passed");
-    // const handler = Object.entries(routesHandlers).filter(
-    //   ({ route, controller }) => {
-    //     return path;
-    //   }
-    // );
 
     if (!url.startsWith("/api")) throw new NotFoundException(`path '${url}'`);
     const replacedUrl = url.replace("/api", "");

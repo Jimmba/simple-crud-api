@@ -1,8 +1,8 @@
 import { config } from "dotenv";
-import { Database } from "./database";
+import { listenWorkers } from "./databases";
 import { cpus } from "os";
 import cluster from "cluster";
-import { createServer, IncomingMessage, ServerResponse } from "http";
+import { createServer, IncomingMessage, request, ServerResponse } from "http";
 import { Router } from "./router";
 import { HttpException } from "./exceptions";
 import { sendResponse } from "./helpers";
@@ -10,12 +10,11 @@ import { STATUS_CODES } from "./constants";
 
 config();
 
-const db = new Database();
-
-export const serverCallback = (db: Database) => {
-  const router = new Router(db);
+export const serverCallback = (port: number) => {
+  const router = new Router();
   return async (req: IncomingMessage, res: ServerResponse) => {
     try {
+      console.log(`Processed request on port ${port}, pid: ${process.pid}`);
       return await router.handleRequest(req, res);
     } catch (e) {
       let statusCode;
@@ -32,7 +31,7 @@ export const serverCallback = (db: Database) => {
 
 const bootstrapMulti = async () => {
   const workerPort = parseInt(process.env.PORT || "4001", 10);
-  const app = createServer(await serverCallback(db));
+  const app = createServer(await serverCallback(workerPort));
   await app.listen(workerPort);
   console.log(`Server is started at port ${workerPort}`);
 };
@@ -43,6 +42,37 @@ if (cluster.isPrimary) {
   for (let i = 1; i <= clusterCount; i += 1) {
     cluster.fork({ PORT: port + i });
   }
+
+  //listen workers
+  listenWorkers();
+
+  // parallelism
+  let currentWorker = 1;
+  const loadBalancer = createServer(
+    (req: IncomingMessage, res: ServerResponse) => {
+      const workerPort = port + currentWorker;
+      const options = {
+        hostname: "localhost",
+        port: workerPort,
+        path: req.url,
+        method: req.method,
+        headers: req.headers,
+      };
+
+      const proxy = request(options, (proxyRes) => {
+        res.writeHead(proxyRes.statusCode!, proxyRes.headers);
+        proxyRes.pipe(res, { end: true });
+      });
+      req.pipe(proxy, { end: true });
+      currentWorker = (currentWorker % clusterCount) + 1;
+    }
+  );
+
+  loadBalancer.listen(port, () => {
+    console.log(`Load balancer is listening on port ${port}`);
+  });
+  // parallelism
+
   cluster.on("exit", (worker) => {
     console.log(`Process id ${worker.process.pid} is dead`);
   });

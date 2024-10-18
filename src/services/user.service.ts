@@ -1,36 +1,39 @@
-import { Database } from "../database";
+import cluster from "cluster";
+import { DatabaseInMemory, IPCDatabase } from "../databases";
 import { NotFoundException } from "../exceptions";
 import { ICreateUser, IUser } from "../interfaces";
 
 export class UserService {
-  database: Database;
+  database: DatabaseInMemory | IPCDatabase;
 
-  constructor(db: Database) {
-    this.database = db;
+  constructor() {
+    this.database = !cluster.isWorker
+      ? new DatabaseInMemory()
+      : new IPCDatabase();
   }
 
-  createUser(user: ICreateUser): IUser {
+  async createUser(user: ICreateUser): Promise<IUser> {
     return this.database.createUser(user);
   }
 
-  getAllUsers(): IUser[] {
+  async getAllUsers(): Promise<IUser[]> {
     return this.database.getAllUsers();
   }
 
-  getUserById(userId: string): IUser {
-    const user = this.database.getUserById(userId);
+  async getUserById(userId: string): Promise<IUser> {
+    const user = await this.database.getUserById(userId);
     if (!user) throw new NotFoundException(`userId '${userId}'`);
     return user;
   }
 
-  updateUser(userId: string, user: ICreateUser): IUser {
-    const updatedUser = this.database.updateUser(userId, user);
+  async updateUser(userId: string, user: ICreateUser): Promise<IUser> {
+    const updatedUser = await this.database.updateUser({ userId, user });
     if (!updatedUser) throw new NotFoundException(`userId '${userId}'`);
     return updatedUser;
   }
 
-  removeUser(userId: string): void {
-    const result = this.database.removeUser(userId);
+  async removeUser(userId: string): Promise<void> {
+    const result = await this.database.removeUser(userId);
     if (!result) throw new NotFoundException(`userId '${userId}'`);
   }
 }
