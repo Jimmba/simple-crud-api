@@ -1,9 +1,9 @@
-import { IncomingMessage, ServerResponse } from "http";
+import { ServerResponse } from "http";
 import { STATUS_CODES } from "../constants";
 import { sendResponse, validateCreateUser, validateUuid } from "../helpers";
-import { UserService } from "./user.service";
 import { BadRequestException } from "../exceptions";
 import { ICreateUser } from "../interfaces";
+import { UserService } from "../services";
 
 export class UserController {
   userService: UserService;

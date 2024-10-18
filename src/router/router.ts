@@ -1,5 +1,5 @@
-import { IncomingMessage, METHODS, ServerResponse } from "http";
-import { UserController } from "../users";
+import { IncomingMessage, ServerResponse } from "http";
+import { UserController } from "../controllers";
 import { BadRequestException, NotFoundException } from "../exceptions";
 import { HTTP_METHODS } from "../constants";
 import { getBodyFromRequest } from "../helpers";
