@@ -4,6 +4,7 @@ import { BadRequestException, NotFoundException } from "../exceptions";
 import { HTTP_METHODS } from "../constants";
 import { getBodyFromRequest } from "../helpers";
 import { ICreateUser } from "../interfaces";
+import { Database } from "../database";
 
 // const routesHandlers = { //! controller handler
 //   users: UserController,
@@ -12,8 +13,8 @@ import { ICreateUser } from "../interfaces";
 export class Router {
   userController: UserController;
 
-  constructor() {
-    this.userController = new UserController();
+  constructor(db: Database) {
+    this.userController = new UserController(db);
   }
 
   async handleRequest(req: IncomingMessage, res: ServerResponse) {

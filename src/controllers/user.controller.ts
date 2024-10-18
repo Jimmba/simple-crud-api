@@ -4,12 +4,13 @@ import { sendResponse, validateCreateUser, validateUuid } from "../helpers";
 import { BadRequestException } from "../exceptions";
 import { ICreateUser } from "../interfaces";
 import { UserService } from "../services";
+import { Database } from "../database";
 
 export class UserController {
   userService: UserService;
 
-  constructor() {
-    this.userService = new UserService();
+  constructor(db: Database) {
+    this.userService = new UserService(db);
   }
 
   async createUser(res: ServerResponse, body: ICreateUser) {

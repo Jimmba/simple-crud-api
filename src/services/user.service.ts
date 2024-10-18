@@ -5,8 +5,8 @@ import { ICreateUser, IUser } from "../interfaces";
 export class UserService {
   database: Database;
 
-  constructor() {
-    this.database = new Database();
+  constructor(db: Database) {
+    this.database = db;
   }
 
   createUser(user: ICreateUser): IUser {
