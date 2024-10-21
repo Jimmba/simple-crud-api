@@ -4,11 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
-    "start:prod": "tsc && node dist/index.js",
-    "start:prodmulti": "tsc && node dist/multi.js",
     "start:dev": "nodemon src/index.ts",
     "start:multi": "nodemon src/multi.ts",
+    "start:prod": "tsc && node dist/index.js",
+    "start:prodmulti": "tsc && node dist/multi.js",
     "test": "jest --runInBand --detectOpenHandles --forceExit"
   },
   "author": "",

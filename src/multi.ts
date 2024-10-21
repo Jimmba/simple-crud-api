@@ -43,10 +43,8 @@ if (cluster.isPrimary) {
     cluster.fork({ PORT: port + i });
   }
 
-  //listen workers
   listenWorkers();
 
-  // parallelism
   let currentWorker = 1;
   const loadBalancer = createServer(
     (req: IncomingMessage, res: ServerResponse) => {
@@ -71,7 +69,6 @@ if (cluster.isPrimary) {
   loadBalancer.listen(port, () => {
     console.log(`Load balancer is listening on port ${port}`);
   });
-  // parallelism
 
   cluster.on("exit", (worker) => {
     console.log(`Process id ${worker.process.pid} is dead`);
